@@ -7,7 +7,7 @@ Date: June, 2017
 
 # What is a socket?
 
-![](/Users/qinyeli/Desktop/socket.jpg)
+![](./socket.jpg)
 
 ---
 
@@ -78,6 +78,27 @@ if (isServer) {
 
 # The Network Order
 
+* General computer byte order: little-endian
+* Network byte order: big-endian
+
+
+```cpp
+htonl() // host ot network long
+htons() // host to network short
+ntohl() // network to host long
+ntohs() // netowrk to host short
+```
+---
+
+## `htons()`, `htonl()`, `ntohs()` and `ntohl()`
+
+```cpp
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint16_t netshort);
+```
+
 ---
 
 # `bind()`
@@ -128,6 +149,14 @@ char buf[BUFFER_SIZE];
 recv(connection, buf, BUFFER_SIZE, 0); // blocking
 // returns the number of bytes actually received
 // If returns 0, the remote side has closed the connection
+```
+
+---
+
+# `close()`
+
+```cpp
+close(connection);
 ```
 
 ---
