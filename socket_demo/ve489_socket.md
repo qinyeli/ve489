@@ -1,7 +1,9 @@
+<!-- page_number: true -->
+
 # VE489 Computer Networks
 ## Socket Programming
 Author: Qinye Li  
-Date: June, 2017
+Date: June 16, 2017
 
 ---
 
@@ -25,6 +27,7 @@ Date: June, 2017
 	* Uses TCP
 * Datagram socket
 	* Uses UDP
+* And other sockets that you don't need to know for now
 
 ---
 
@@ -47,7 +50,7 @@ int sock = socket(AF_INET, SOCK_DGRAM, 0);
 ```
 ---
 
-# `sockaddr_in`
+# `sockaddr_in` -- describes the address
 
 Socket describes
 * protocol
@@ -69,6 +72,7 @@ addr.sin_port = htons(port);
 if (isServer) {
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     // INADDR_ANY means any connection
+    
 } else if (isClient) {
     addr.sin_addr.s_addr = inet_addr(hostIP.c_str());
 }
@@ -83,14 +87,14 @@ if (isServer) {
 
 
 ```cpp
-htonl() // host ot network long
-htons() // host to network short
-ntohl() // network to host long
-ntohs() // netowrk to host short
+htonl(); // host ot network long
+htons(); // host to network short
+ntohl(); // network to host long
+ntohs(); // netowrk to host short
 ```
 ---
 
-## `htons()`, `htonl()`, `ntohs()` and `ntohl()`
+more specificly,
 
 ```cpp
 uint32_t htonl(uint32_t hostlong);
@@ -132,23 +136,25 @@ int clientSock = accept(sock, 0, 0);
 ```cpp
 if (isClient) {
     connection = sock;
+    
 } elseif (isServer) {
     connection = clientSock;
 }
 ```
-
 ---
-```
+
+# `send()` and `recv()`
+```cpp
 string message;
 send(connection, message.c_str(), message.size(), 0);
 // returns the number of bytes actually sent
 ```
 
-```
+```cpp
 char buf[BUFFER_SIZE];
 recv(connection, buf, BUFFER_SIZE, 0); // blocking
 // returns the number of bytes actually received
-// If returns 0, the remote side has closed the connection
+// If returns 0, the remote side has closed connection
 ```
 
 ---
@@ -186,7 +192,7 @@ if (connect(...)) {
 ```cpp
 int bytesReceived = 0;
 while(bytesReceived <= bytesExpected) {
-	int rc = recv(connection, buf, BUFFER_SIZE, 0);
+    int rc = recv(connection, buf, BUFFER_SIZE, 0);
     if (rc == -1) {
     	cerr << strerror(errno) << endl;
     }
@@ -205,6 +211,9 @@ recv(connection, buf, BUFFER_SIZE, MSG_WAITALL);
 ---
 
 # Talk to me the Datagram style ; - )
+
+* `listen()`, `connect()` and `accept()` no longer needed
+
 # `sendto()` and `recvfrom()`
 
 ```cpp
@@ -218,6 +227,54 @@ char buf[BUFFER_SIZE];
 recvfrom(sock, buf, BUFFER_SIZE, 0,
         (sockaddr*) &addr, sizeof(sockaddr_in));
 ```
+---
+
+# Things not mentioned in class
+Here are a couple of things I didn't mention in class.
+
+Well, I didn't want to overwhelm you with the complexity and distract you from what really matters. So I shaved off those complicated pieces in my demo code.
+
+Sure, sure, you can use them in your code. They work. No one is going to hit you for this. But they are just not the best practise.
+
+Now that you are curious enough to get back to these slides, I am going to talk about the better practise.
+
+---
+
+# `sockaddr_in` and `sockaddr_in6`
+
+The `sockaddr_in` in page 9 is for IPv4 specificly. The IPv6 version is called `sockaddr_in6`. Of course, there is away to code in a way that's compatible with both IPv4 and IPv6. No need to manually packs the `struct sockaddr_in` before calling `bind()` in this case.
+
+See Beej's Guid [Section 5.1 `getaddrinfo()`](http://beej.us/guide/bgnet/output/html/multipage/syscalls.html#getaddrinfo) and
+[Section 5.3 bind()](http://beej.us/guide/bgnet/output/html/multipage/syscalls.html#bind) for more detail.
+
+---
+
+# Conversion between `string` and `struct in_addr` ip address
+
+I used `inet_addr()` in page 8 to convert `string` ip address to `struct in_addr` ip address. Yet this function is for IPv4 specificly, and is deprecated even for IPv4 use. But why do I use it here? Cuz it's got the easiest interface =). 
+
+Ok. Then what's the better approach?
+```
+inet_pton(); // printable to network ip address
+inet_ntop(); // network to printable ip address
+```
+---
+
+More specificly,
+
+```
+const char *inet_ntop(int af, const void *src,
+                      char *dst, socklen_t size);
+
+int inet_pton(int af, const char *src, void *dst);
+```
+
+Confused?
+
+Don't worry, these are on the "I can always look them up when I need" list. Just remember this is used for conversion between human-readable and computer-readable ip address.
+
+See Beej's Guid [Section 9.13 `inet_ntoa()`](http://beej.us/guide/bgnet/output/html/multipage/inet_ntoaman.html) and [Section 9.14 `inet_ntop()`](http://beej.us/guide/bgnet/output/html/multipage/inet_ntopman.html) for more detail.
+
 ---
 
 # Ref
