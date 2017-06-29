@@ -1,7 +1,6 @@
 <!-- page_number: true -->
 
 # VE489 Mid Review -- Data Link Layer
-
 Author: Qinye Li   
 Date: June 27, 2017
 
